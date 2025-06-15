@@ -1,5 +1,4 @@
 /// A client for the URL shortener API.
-
 use crate::{
     errors::{ApiError, UrlShortenerError, ValidationError},
     requests::{
@@ -8,11 +7,10 @@ use crate::{
     utils::{is_valid_alias, is_valid_password, is_valid_url},
 };
 
-
 /// A client for the URL shortener API.
-/// 
+///
 /// This client can be used in both async and blocking modes, depending on the feature flags.
-/// 
+///
 /// # Example usage:
 /// ```rust
 /// use spoome::client::UrlShortenerClient;
@@ -27,7 +25,7 @@ use crate::{
 ///         .password("Example@123")
 ///         .max_clicks(100)
 ///         .block_bots(true);
-/// 
+///
 ///     let response = client.shorten(request).await?;
 ///     println!("Shortened URL: {}", response.short_url);
 ///     Ok(())
@@ -53,7 +51,7 @@ impl UrlShortenerClient {
     }
 
     /// Create a new client with a custom base URL
-    /// 
+    ///
     /// Requires the `custom_url` feature to be enabled.
     #[cfg(feature = "custom_url")]
     pub fn new_with_base_url(url: &str) -> Self {
@@ -67,7 +65,7 @@ impl UrlShortenerClient {
     }
 
     /// Set a custom base URL for the client.
-    /// 
+    ///
     /// Requires the `custom_url` feature to be enabled.
     #[cfg(feature = "custom_url")]
     pub fn set_base_url(&mut self, url: &str) {
