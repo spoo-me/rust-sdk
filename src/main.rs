@@ -1,4 +1,4 @@
-use spoome::{
+use spoo_me::{
     client::UrlShortenerClient,
     requests::{EmojiRequest, ShortenRequest, StatsRequest},
 };

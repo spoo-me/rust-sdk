@@ -1,5 +1,5 @@
 [package]
-name = "spoome"
+name = "spoo-me"
 version = "0.1.0"
 authors = ["rdni"]
 description = "Bindings for accessing spoo.me api"

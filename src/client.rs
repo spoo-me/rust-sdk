@@ -13,15 +13,14 @@ use crate::{
 ///
 /// # Example usage:
 /// ```rust
-/// use spoome::client::UrlShortenerClient;
-/// use spoome::requests::ShortenRequest;
-/// use spoome::errors::UrlShortenerError;
+/// use spoo_me::client::UrlShortenerClient;
+/// use spoo_me::requests::ShortenRequest;
+/// use spoo_me::errors::UrlShortenerError;
 ///
 /// #[tokio::main]
 /// async fn main() -> Result<(), UrlShortenerError> {
 ///     let client = UrlShortenerClient::new();
 ///     let request = ShortenRequest::new("https://example.com/long/url")
-///         .alias("testing_alias")
 ///         .password("Example@123")
 ///         .max_clicks(100)
 ///         .block_bots(true);
