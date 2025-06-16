@@ -1,0 +1,18 @@
+[package]
+name = "spoome"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+blocking = []
+custom_url = []
+full = ["custom_url"]
+
+[dependencies]
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_urlencoded = "0.7"
+thiserror = "1.0"
+regex = "1.11"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }  # only for async use
+serde_json = "1"
