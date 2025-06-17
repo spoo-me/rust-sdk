@@ -1,6 +1,6 @@
 [package]
 name = "spoo-me"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["rdni"]
 description = "Bindings for accessing spoo.me api"
 edition = "2021"

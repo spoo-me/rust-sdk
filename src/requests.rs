@@ -1,15 +1,15 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 /// Response for URL-shortening endpoints (`/` and `/emoji`).
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ShortenResponse {
     /// The resulting shortened URL (full URL).
     pub short_url: String,
 }
 
 /// Request payload for `POST /` (shorten URL).
-#[derive(Debug, Serialize, Default)]
+#[derive(Debug, Serialize, Default, Clone)]
 pub struct ShortenRequest {
     pub(crate) url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -53,7 +53,7 @@ impl ShortenRequest {
 }
 
 /// Request payload for `POST /emoji` (uses emojis as slug).
-#[derive(Debug, Serialize, Default)]
+#[derive(Debug, Serialize, Default, Clone)]
 pub struct EmojiRequest {
     pub(crate) url: String,
     #[serde(rename = "emojies", skip_serializing_if = "Option::is_none")]
@@ -97,14 +97,14 @@ impl EmojiRequest {
 }
 
 /// Response struct for `POST /emoji`, containing the shortened URL.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EmojiResponse {
     /// The resulting shortened URL (full URL).
     pub short_url: String,
 }
 
 /// Request payload for `POST /stats/{shortCode}`.
-#[derive(Debug, Serialize, Default)]
+#[derive(Debug, Serialize, Default, Clone)]
 pub struct StatsRequest {
     #[serde(skip_serializing)]
     pub(crate) short_code: String,
@@ -128,7 +128,7 @@ impl StatsRequest {
 }
 
 /// Response struct for `POST /stats/{shortCode}`, containing URL statistics.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StatsResponse {
     /// The code of the short URL.
     pub short_code: String,
@@ -178,4 +178,81 @@ pub struct StatsResponse {
     pub unique_os_name: Option<HashMap<String, u32>>,
     /// Unique clicks per referrer.
     pub unique_referrer: Option<HashMap<String, u32>>,
+}
+
+/// Enum representing the available export formats.
+#[derive(Debug, Deserialize, Clone)]
+pub enum ExportFormat {
+    /// Export as JSON.
+    JSON,
+    /// Export as CSV, zipped together.
+    CSV,
+    /// Export as XLSX (Excel format).
+    XLSX,
+    /// Export as XML.
+    XML,
+}
+
+impl Display for ExportFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ExportFormat::JSON => write!(f, "json"),
+            ExportFormat::CSV => write!(f, "csv"),
+            ExportFormat::XLSX => write!(f, "xlsx"),
+            ExportFormat::XML => write!(f, "xml"),
+        }
+    }
+}
+
+/// Request payload for `POST /export/{shortCode}/{exportFormat}`.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ExportRequest {
+    /// The short code of the URL to export.
+    #[serde(skip_serializing)]
+    pub(crate) short_code: String,
+    #[serde(skip_serializing)]
+    pub(crate) export_format: ExportFormat,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) password: Option<String>,
+}
+
+impl ExportRequest {
+    /// Creates a new ExportRequest with the mandatory `short_code` and `export_format`.
+    pub fn new<S: Into<String>>(short_code: S, export_format: ExportFormat) -> Self {
+        ExportRequest {
+            short_code: short_code.into(),
+            export_format,
+            password: None,
+        }
+    }
+
+    /// Optional password for accessing the export (if set on the short URL).
+    pub fn password<P: Into<String>>(mut self, password: P) -> Self {
+        self.password = Some(password.into());
+        self
+    }
+}
+
+/// Implementation for creating an export request.
+#[derive(Debug, Clone)]
+pub struct ExportResponse {
+    /// The raw data returned
+    pub(crate) data: Vec<u8>,
+}
+
+impl ExportResponse {
+    /// Writes the export data to a file at the specified path.
+    pub fn save_to_file(&self, path: &str) -> std::io::Result<()> {
+        use std::fs::File;
+        use std::io::Write;
+
+        let mut file = File::create(path)?;
+        file.write_all(&self.data)?;
+        Ok(())
+    }
+
+    /// Returns the raw data of the export.
+    pub fn data(&self) -> &[u8] {
+        &self.data
+    }
 }

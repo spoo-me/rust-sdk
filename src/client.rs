@@ -2,7 +2,8 @@
 use crate::{
     errors::{ApiError, UrlShortenerError, ValidationError},
     requests::{
-        EmojiRequest, EmojiResponse, ShortenRequest, ShortenResponse, StatsRequest, StatsResponse,
+        EmojiRequest, EmojiResponse, ExportRequest, ExportResponse, ShortenRequest,
+        ShortenResponse, StatsRequest, StatsResponse,
     },
     utils::{is_valid_alias, is_valid_max_clicks, is_valid_password, is_valid_url},
 };
@@ -461,7 +462,7 @@ impl UrlShortenerClient {
             if status.as_u16() == 429 {
                 return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
             }
-            
+
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
@@ -479,6 +480,117 @@ impl UrlShortenerClient {
 
         let result =
             serde_json::from_str::<StatsResponse>(&text).map_err(UrlShortenerError::Json)?;
+
+        Ok(result)
+    }
+
+    /// Export data for a shortened URL (async mode).
+    #[cfg(not(feature = "blocking"))]
+    pub async fn export(&self, req: ExportRequest) -> Result<ExportResponse, UrlShortenerError> {
+        if req.short_code.is_empty() {
+            return Err(UrlShortenerError::Validation(
+                ValidationError::InvalidAliasFormat(req.short_code),
+            ));
+        }
+
+        if !is_valid_alias(&req.short_code) {
+            return Err(UrlShortenerError::Validation(
+                ValidationError::InvalidAliasFormat(req.short_code.clone()),
+            ));
+        }
+
+        let resp = self
+            .client
+            .post(format!(
+                "{}/export/{}/{}",
+                self.base_url, req.short_code, req.export_format
+            ))
+            .form(&req)
+            .send()
+            .await
+            .map_err(UrlShortenerError::Http)?;
+
+        let status = resp.status();
+        if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
+            let text = resp.text().await.map_err(UrlShortenerError::Http)?;
+            if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
+                if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
+                    return Err(UrlShortenerError::Api(match err {
+                        "UrlError" => ApiError::UrlError,
+                        "AliasError" => ApiError::AliasError,
+                        "PasswordError" => ApiError::PasswordError,
+                        "MaxClicksError" => ApiError::MaxClicksError,
+                        "EmojiError" => ApiError::EmojiError,
+                        _ => ApiError::Other(err.to_string()),
+                    }));
+                }
+            }
+            return Err(UrlShortenerError::Other(text));
+        }
+
+        let data = resp.bytes().await.map_err(UrlShortenerError::Http)?;
+        let result = ExportResponse {
+            data: data.to_vec(),
+        };
+
+        Ok(result)
+    }
+
+    /// Export data for a shortened URL (blocking mode).
+    #[cfg(feature = "blocking")]
+    pub fn export_blocking(&self, req: ExportRequest) -> Result<ExportResponse, UrlShortenerError> {
+        if req.short_code.is_empty() {
+            return Err(UrlShortenerError::Validation(
+                ValidationError::InvalidAliasFormat(req.short_code),
+            ));
+        }
+
+        if !is_valid_alias(&req.short_code) {
+            return Err(UrlShortenerError::Validation(
+                ValidationError::InvalidAliasFormat(req.short_code.clone()),
+            ));
+        }
+
+        let resp = self
+            .client
+            .post(format!(
+                "{}/export/{}/{}",
+                self.base_url, req.short_code, req.export_format
+            ))
+            .form(&req)
+            .send()
+            .map_err(UrlShortenerError::Http)?;
+
+        let status = resp.status();
+        if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
+            let text = resp.text().map_err(UrlShortenerError::Http)?;
+            if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
+                if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
+                    return Err(UrlShortenerError::Api(match err {
+                        "UrlError" => ApiError::UrlError,
+                        "AliasError" => ApiError::AliasError,
+                        "PasswordError" => ApiError::PasswordError,
+                        "MaxClicksError" => ApiError::MaxClicksError,
+                        "EmojiError" => ApiError::EmojiError,
+                        _ => ApiError::Other(err.to_string()),
+                    }));
+                }
+            }
+            return Err(UrlShortenerError::Other(text));
+        }
+
+        let data = resp.bytes().map_err(UrlShortenerError::Http)?;
+        let result = ExportResponse {
+            data: data.to_vec(),
+        };
 
         Ok(result)
     }

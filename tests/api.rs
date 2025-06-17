@@ -1,6 +1,6 @@
 use spoo_me::{
     client::UrlShortenerClient,
-    requests::{EmojiRequest, ShortenRequest, StatsRequest},
+    requests::{EmojiRequest, ExportFormat, ExportRequest, ShortenRequest, StatsRequest},
 };
 
 #[tokio::test]
@@ -71,5 +71,57 @@ async fn test_stats() {
     assert!(
         stats.creation_date.is_some(),
         "Stats should have a creation date"
+    );
+}
+
+#[tokio::test]
+async fn test_export_json() {
+    let client = UrlShortenerClient::new();
+    let request = ExportRequest::new("ga", ExportFormat::JSON);
+    let response = client.export(request).await;
+
+    assert!(
+        response.is_ok(),
+        "Failed to export stats as JSON: {:?}",
+        response.err()
+    );
+}
+
+#[tokio::test]
+async fn test_export_csv() {
+    let client = UrlShortenerClient::new();
+    let request = ExportRequest::new("ga", ExportFormat::CSV);
+    let response = client.export(request).await;
+
+    assert!(
+        response.is_ok(),
+        "Failed to export stats as JSON: {:?}",
+        response.err()
+    );
+}
+
+#[tokio::test]
+async fn test_export_xlsx() {
+    let client = UrlShortenerClient::new();
+    let request = ExportRequest::new("ga", ExportFormat::XLSX);
+    let response = client.export(request).await;
+
+    assert!(
+        response.is_ok(),
+        "Failed to export stats as JSON: {:?}",
+        response.err()
+    );
+}
+
+#[tokio::test]
+async fn test_export_xml() {
+    let client = UrlShortenerClient::new();
+    let request = ExportRequest::new("ga", ExportFormat::XML);
+    let response = client.export(request).await;
+
+    assert!(
+        response.is_ok(),
+        "Failed to export stats as JSON: {:?}",
+        response.err()
     );
 }
