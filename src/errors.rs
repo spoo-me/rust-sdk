@@ -1,5 +1,9 @@
+use std::fmt::Display;
+
+use thiserror::Error;
+
 /// Errors that can occur when sending requests (client validation or HTTP errors).
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ValidationError {
     /// Password does not meet format requirements.
     InvalidPasswordFormat(String),
@@ -13,8 +17,26 @@ pub enum ValidationError {
     InvalidEmojiSequence(String),
 }
 
+impl Display for ValidationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ValidationError::InvalidPasswordFormat(msg) => {
+                write!(f, "Invalid password format: {}", msg)
+            }
+            ValidationError::InvalidAliasFormat(msg) => write!(f, "Invalid alias format: {}", msg),
+            ValidationError::InvalidUrlFormat(msg) => write!(f, "Invalid URL format: {}", msg),
+            ValidationError::InvalidMaxClicks(value) => {
+                write!(f, "Max-clicks must be a positive integer, got: {}", value)
+            }
+            ValidationError::InvalidEmojiSequence(seq) => {
+                write!(f, "Invalid emoji sequence: {}", seq)
+            }
+        }
+    }
+}
+
 /// Errors that can occur when interacting with the spoo.me API.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ApiError {
     /// The URL does not match the expected format.
     UrlError,
@@ -28,8 +50,20 @@ pub enum ApiError {
     EmojiError,
 }
 
+impl Display for ApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ApiError::UrlError => write!(f, "Invalid URL format"),
+            ApiError::AliasError => write!(f, "Alias already in use or invalid"),
+            ApiError::PasswordError => write!(f, "Incorrect password provided"),
+            ApiError::MaxClicksError => write!(f, "Invalid max clicks value"),
+            ApiError::EmojiError => write!(f, "Invalid or already used emoji sequence"),
+        }
+    }
+}
+
 /// Errors that can occur when using the URL shortener client.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum UrlShortenerError {
     /// Validation errors related to the request parameters.
     Validation(ValidationError),
@@ -41,4 +75,16 @@ pub enum UrlShortenerError {
     Json(serde_json::Error),
     /// Other unexpected status codes or errors.
     Other(String),
+}
+
+impl Display for UrlShortenerError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UrlShortenerError::Validation(err) => write!(f, "Validation error: {}", err),
+            UrlShortenerError::Api(err) => write!(f, "API error: {:?}", err),
+            UrlShortenerError::Http(err) => write!(f, "HTTP error: {}", err),
+            UrlShortenerError::Json(err) => write!(f, "JSON error: {}", err),
+            UrlShortenerError::Other(msg) => write!(f, "Other error: {}", msg),
+        }
+    }
 }

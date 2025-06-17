@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["rdni"]
 description = "Bindings for accessing spoo.me api"
 edition = "2021"
+include = [
+    "/src/**",
+    "/Cargo.toml",
+    "/LICENSE",
+    "/README.md",
+    "/tests/**"
+]
+keywords = ["async", "api", "sdk", "bindings"]
 license = "Apache-2.0"
 repository = "https://github.com/spoo-me/rust-sdk"
 

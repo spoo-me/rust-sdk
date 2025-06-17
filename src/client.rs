@@ -4,7 +4,7 @@ use crate::{
     requests::{
         EmojiRequest, EmojiResponse, ShortenRequest, ShortenResponse, StatsRequest, StatsResponse,
     },
-    utils::{is_valid_alias, is_valid_password, is_valid_url},
+    utils::{is_valid_alias, is_valid_max_clicks, is_valid_password, is_valid_url},
 };
 
 /// A client for the URL shortener API.
@@ -99,6 +99,14 @@ impl UrlShortenerClient {
             if !is_valid_alias(alias) {
                 return Err(UrlShortenerError::Validation(
                     ValidationError::InvalidAliasFormat(alias.clone()),
+                ));
+            }
+        }
+
+        if let Some(max_clicks) = req.max_clicks {
+            if !is_valid_max_clicks(max_clicks) {
+                return Err(UrlShortenerError::Validation(
+                    ValidationError::InvalidMaxClicks(max_clicks),
                 ));
             }
         }
