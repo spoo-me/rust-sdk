@@ -48,6 +48,10 @@ pub enum ApiError {
     MaxClicksError,
     /// The emoji sequence is already in use or invalid.
     EmojiError,
+    /// The rate limit for the API has been exceeded.
+    RateLimitExceeded,
+    /// Other unexpected errors from the API.
+    Other(String),
 }
 
 impl Display for ApiError {
@@ -58,6 +62,8 @@ impl Display for ApiError {
             ApiError::PasswordError => write!(f, "Incorrect password provided"),
             ApiError::MaxClicksError => write!(f, "Invalid max clicks value"),
             ApiError::EmojiError => write!(f, "Invalid or already used emoji sequence"),
+            ApiError::RateLimitExceeded => write!(f, "Rate limit exceeded for the API"),
+            ApiError::Other(msg) => write!(f, "API error: {}", msg),
         }
     }
 }

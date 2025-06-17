@@ -123,6 +123,10 @@ impl UrlShortenerClient {
         let status = resp.status();
         let text = resp.text().await.map_err(UrlShortenerError::Http)?;
         if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
@@ -179,6 +183,14 @@ impl UrlShortenerClient {
             }
         }
 
+        if let Some(max_clicks) = req.max_clicks {
+            if !is_valid_max_clicks(max_clicks) {
+                return Err(UrlShortenerError::Validation(
+                    ValidationError::InvalidMaxClicks(max_clicks),
+                ));
+            }
+        }
+
         let resp = self
             .client
             .post(format!("{}/", self.base_url))
@@ -190,6 +202,10 @@ impl UrlShortenerClient {
         let status = resp.status();
         let text = resp.text().map_err(UrlShortenerError::Http)?;
         if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
@@ -235,6 +251,14 @@ impl UrlShortenerClient {
             ));
         }
 
+        if let Some(max_clicks) = req.max_clicks {
+            if !is_valid_max_clicks(max_clicks) {
+                return Err(UrlShortenerError::Validation(
+                    ValidationError::InvalidMaxClicks(max_clicks),
+                ));
+            }
+        }
+
         let resp = self
             .client
             .post(format!("{}/emoji", self.base_url))
@@ -247,6 +271,10 @@ impl UrlShortenerClient {
         let status = resp.status();
         let text = resp.text().await.map_err(UrlShortenerError::Http)?;
         if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
@@ -255,7 +283,7 @@ impl UrlShortenerClient {
                         "PasswordError" => ApiError::PasswordError,
                         "MaxClicksError" => ApiError::MaxClicksError,
                         "EmojiError" => ApiError::EmojiError,
-                        _ => ApiError::UrlError,
+                        err => ApiError::Other(err.to_string()),
                     }));
                 }
             }
@@ -292,6 +320,14 @@ impl UrlShortenerClient {
             ));
         }
 
+        if let Some(max_clicks) = req.max_clicks {
+            if !is_valid_max_clicks(max_clicks) {
+                return Err(UrlShortenerError::Validation(
+                    ValidationError::InvalidMaxClicks(max_clicks),
+                ));
+            }
+        }
+
         let resp = self
             .client
             .post(format!("{}/emoji", self.base_url))
@@ -303,6 +339,10 @@ impl UrlShortenerClient {
         let status = resp.status();
         let text = resp.text().map_err(UrlShortenerError::Http)?;
         if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
@@ -359,6 +399,10 @@ impl UrlShortenerClient {
         let status = resp.status();
         let text = resp.text().await.map_err(UrlShortenerError::Http)?;
         if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
@@ -414,6 +458,10 @@ impl UrlShortenerClient {
         let status = resp.status();
         let text = resp.text().map_err(UrlShortenerError::Http)?;
         if !status.is_success() {
+            if status.as_u16() == 429 {
+                return Err(UrlShortenerError::Api(ApiError::RateLimitExceeded));
+            }
+            
             if let Ok(err_json) = serde_json::from_str::<serde_json::Value>(&text) {
                 if let Some(err) = err_json.get("error").and_then(|e| e.as_str()) {
                     return Err(UrlShortenerError::Api(match err {
