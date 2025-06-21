@@ -26,10 +26,10 @@ pub fn is_valid_url(url: &str) -> bool {
     re.is_match(url) && !url.contains("spoo.me") && !url.contains("..")
 }
 
-/// Validate alias format (alphanumeric, underscores, hyphens, max 15 chars).
+/// Validate alias format (alphanumeric, underscores, hyphens, max 16 chars).
 pub fn is_valid_alias(alias: &str) -> bool {
     let re = regex::Regex::new(ALIAS_REGEX).unwrap();
-    re.is_match(alias) && !alias.is_empty() && alias.len() <= 15
+    re.is_match(alias) && !alias.is_empty() && alias.len() <= 16
 }
 
 /// Validate max-clicks (must be a positive integer).

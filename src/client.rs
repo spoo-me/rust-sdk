@@ -18,6 +18,7 @@ use crate::{
 /// use spoo_me::requests::ShortenRequest;
 /// use spoo_me::errors::UrlShortenerError;
 ///
+/// #[cfg(not(feature = "blocking"))]
 /// #[tokio::main]
 /// async fn main() -> Result<(), UrlShortenerError> {
 ///     let client = UrlShortenerClient::new();
@@ -30,6 +31,20 @@ use crate::{
 ///     println!("Shortened URL: {}", response.short_url);
 ///     Ok(())
 /// }
+///
+/// #[cfg(feature = "blocking")]
+/// fn main() -> Result<(), UrlShortenerError> {
+///     let client = UrlShortenerClient::new();
+///     let request = ShortenRequest::new("https://example.com/long/url")
+///         .password("Example@123")
+///         .max_clicks(100)
+///         .block_bots(true);
+///
+///     let response = client.shorten_blocking(request)?;
+///     println!("Shortened URL: {}", response.short_url);
+///     Ok(())
+/// }
+#[derive(Debug, Clone)]
 pub struct UrlShortenerClient {
     base_url: String,
     #[cfg(not(feature = "blocking"))]
@@ -54,9 +69,9 @@ impl UrlShortenerClient {
     ///
     /// Requires the `custom_url` feature to be enabled.
     #[cfg(feature = "custom_url")]
-    pub fn new_with_base_url(url: &str) -> Self {
+    pub fn new_with_base_url<S: Into<String>>(url: S) -> Self {
         UrlShortenerClient {
-            base_url: url.to_string(),
+            base_url: url.into(),
             #[cfg(not(feature = "blocking"))]
             client: reqwest::Client::new(),
             #[cfg(feature = "blocking")]
@@ -68,8 +83,8 @@ impl UrlShortenerClient {
     ///
     /// Requires the `custom_url` feature to be enabled.
     #[cfg(feature = "custom_url")]
-    pub fn set_base_url(&mut self, url: &str) {
-        self.base_url = url.to_string();
+    pub fn set_base_url<T: Into<String>>(&mut self, url: T) {
+        self.base_url = url.into();
     }
 
     /// Shorten a URL (async mode).

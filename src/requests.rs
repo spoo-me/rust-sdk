@@ -6,6 +6,10 @@ use std::{collections::HashMap, fmt::Display};
 pub struct ShortenResponse {
     /// The resulting shortened URL (full URL).
     pub short_url: String,
+    /// The domain name used for the short URL - currently always "spoo.me".
+    pub domain: String,
+    /// The URL that was shortened.
+    pub original_url: String,
 }
 
 /// Request payload for `POST /` (shorten URL).
@@ -101,6 +105,10 @@ impl EmojiRequest {
 pub struct EmojiResponse {
     /// The resulting shortened URL (full URL).
     pub short_url: String,
+    /// The domain name used for the short URL - currently always "spoo.me".
+    pub domain: String,
+    /// The URL that was shortened.
+    pub original_url: String,
 }
 
 /// Request payload for `POST /stats/{shortCode}`.

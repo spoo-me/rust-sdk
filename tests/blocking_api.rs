@@ -1,20 +1,20 @@
-#[cfg(not(feature = "blocking"))]
+#[cfg(feature = "blocking")]
 #[cfg(test)]
-mod async_tests {
+mod blocking_tests {
     use spoo_me::{
         client::UrlShortenerClient,
         requests::{EmojiRequest, ExportFormat, ExportRequest, ShortenRequest, StatsRequest},
     };
 
-    #[tokio::test]
-    async fn test_shorten() {
+    #[test]
+    fn test_shorten() {
         let client = UrlShortenerClient::new();
         let request = ShortenRequest::new("https://example.com")
             .password("Test@123")
             .max_clicks(10)
             .block_bots(true);
 
-        let response = client.shorten(request).await;
+        let response = client.shorten_blocking(request);
         assert!(
             response.is_ok(),
             "Failed to shorten URL: {:?}",
@@ -28,15 +28,15 @@ mod async_tests {
         );
     }
 
-    #[tokio::test]
-    async fn test_emoji() {
+    #[test]
+    fn test_emoji() {
         let client = UrlShortenerClient::new();
         let request = EmojiRequest::new("https://example.com")
             .password("Test@123")
             .max_clicks(10)
             .block_bots(true);
 
-        let response = client.emoji(request).await;
+        let response = client.emoji_blocking(request);
         assert!(
             response.is_ok(),
             "Failed to create emoji URL: {:?}",
@@ -50,12 +50,12 @@ mod async_tests {
         );
     }
 
-    #[tokio::test]
-    async fn test_stats() {
+    #[test]
+    fn test_stats() {
         let client = UrlShortenerClient::new();
         let request = StatsRequest::new("ga"); // Code used for uptime tracking
 
-        let response = client.stats(request).await;
+        let response = client.stats_blocking(request);
         assert!(
             response.is_ok(),
             "Failed to get stats: {:?}",
@@ -77,11 +77,11 @@ mod async_tests {
         );
     }
 
-    #[tokio::test]
-    async fn test_export_json() {
+    #[test]
+    fn test_export_json() {
         let client = UrlShortenerClient::new();
         let request = ExportRequest::new("ga", ExportFormat::JSON);
-        let response = client.export(request).await;
+        let response = client.export_blocking(request);
 
         assert!(
             response.is_ok(),
@@ -90,11 +90,11 @@ mod async_tests {
         );
     }
 
-    #[tokio::test]
-    async fn test_export_csv() {
+    #[test]
+    fn test_export_csv() {
         let client = UrlShortenerClient::new();
         let request = ExportRequest::new("ga", ExportFormat::CSV);
-        let response = client.export(request).await;
+        let response = client.export_blocking(request);
 
         assert!(
             response.is_ok(),
@@ -103,11 +103,11 @@ mod async_tests {
         );
     }
 
-    #[tokio::test]
-    async fn test_export_xlsx() {
+    #[test]
+    fn test_export_xlsx() {
         let client = UrlShortenerClient::new();
         let request = ExportRequest::new("ga", ExportFormat::XLSX);
-        let response = client.export(request).await;
+        let response = client.export_blocking(request);
 
         assert!(
             response.is_ok(),
@@ -116,11 +116,11 @@ mod async_tests {
         );
     }
 
-    #[tokio::test]
-    async fn test_export_xml() {
+    #[test]
+    fn test_export_xml() {
         let client = UrlShortenerClient::new();
         let request = ExportRequest::new("ga", ExportFormat::XML);
-        let response = client.export(request).await;
+        let response = client.export_blocking(request);
 
         assert!(
             response.is_ok(),
